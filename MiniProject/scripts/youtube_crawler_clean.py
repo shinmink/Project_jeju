@@ -24,7 +24,7 @@ def convert_views_to_int(view_str):
 # ✅ 메인 수집 함수 (🆕 Flask 등에서 함수 호출 가능하도록 리팩토링됨)
 def collect_youtube_data(query, limit, sort_option):
     today = datetime.now().strftime('%Y%m%d')
-    output_dir = "../hotplaces"
+    output_dir = "hotplaces"
     os.makedirs(output_dir, exist_ok=True)
 
     data = []
@@ -80,7 +80,12 @@ def collect_youtube_data(query, limit, sort_option):
 
     df.drop(columns="views_int").to_csv(file_path, index=False, encoding='utf-8-sig')
 
-    return f"\n🎉 총 {len(df)}개의 영상 정보를 정렬하여 [{file_path}] 파일에 저장했습니다."
+    # ✅ 요약 텍스트 생성 (상위 5개만 추출)
+    preview_text = "\n📌 상위 5개 영상:\n"
+    for i, row in df.head(5).iterrows():
+        preview_text += f"{i + 1}. {row['title']} - {row['link']}\n"
+
+    return f"\n🎉 총 {len(df)}개의 영상 정보를 정렬하여 [{file_path}] 파일에 저장했습니다.\n" + preview_text
 
 # ✅ 명령줄 실행용 (🆕 input → 인자 방식으로 교체됨)
 if __name__ == "__main__":

@@ -24,7 +24,10 @@ def run_script():
     except subprocess.CalledProcessError as e:
         output = f"❌ 오류 발생:\n{e.stderr}"
 
-    return render_template('index.html', message=output)
+    summary_lines = result.stdout.split('\n')
+    message = summary_lines[0]
+    preview = summary_lines[1:]  # 상위 5개 영상
+    return render_template('index.html', message=message, preview=preview)
 
 if __name__ == '__main__':
     app.run(debug=True)
