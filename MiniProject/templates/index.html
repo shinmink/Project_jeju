@@ -5,6 +5,30 @@
     <title>유튜브 키워드 수집기</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+{% set show_modal = show_modal if show_modal is defined else false %}
+<script>
+  window.onload = () => {
+    const showModal = {{ 'true' if show_modal else 'false' }};
+    const modal = document.getElementById("imageModal");
+    const closeBtn = document.getElementById("modalCloseBtn");
+
+    if (showModal && modal) {
+      modal.style.display = "block";
+    }
+
+    if (closeBtn) {
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+    }
+
+    window.onclick = (event) => {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  };
+</script>
 <body>
 
 <h1>🔍 유튜브 검색 키워드 수집기</h1>
@@ -41,15 +65,24 @@
     </ul>
 <!-- ✅ 추가된 버튼 영역 -->
     <div class="button-group">
-        <form method="POST" action="/generate_wordcloud">
+        <form method="POST" action="/keyword_extractor">
             <button type="submit">🌥️ 워드클라우드 생성하기</button>
         </form>
 
-        <form method="POST" action="/generate_scatter">
+        <form method="POST" action="/scatter_plot">
             <button type="submit">📊 스캐터 플롯 생성하기</button>
         </form>
     </div>
 </div>
 {% endif %}
+<!-- 모달 구조 -->
+<div id="imageModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="modalCloseBtn">&times;</span>
+    {% if image %}
+      <img src="{{ image }}" alt="결과 이미지" style="max-width: 100%; height: auto;">
+    {% endif %}
+  </div>
+</div>
 </body>
 </html>
