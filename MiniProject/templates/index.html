@@ -2,34 +2,31 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>제주 핫플 분석 결과</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background-color: #f7f7f7;
-      margin: 0;
-      padding: 2rem;
-    }
-    h1 {
-      margin-bottom: 2rem;
-    }
-    img {
-      max-width: 90%;
-      height: auto;
-      margin-bottom: 2rem;
-      border: 1px solid #ccc;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    }
-  </style>
+  <title>유튜브 키워드 수집기</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <h1>📊 제주 핫플레이스 트렌드 분석</h1>
 
-  <h2>🌈 워드클라우드</h2>
-  <img src="/static/wordcloud.png" alt="Wordcloud">
+  <h1>🔍 유튜브 검색 키워드 수집기</h1>
 
-  <h2>📈 키워드 vs 평균 조회수</h2>
-  <img src="/static/scatter.png" alt="Scatter Plot">
+  <form method="POST" action="/run">
+    <label for="query">검색 키워드:</label>
+    <input type="text" id="query" name="query" required><br>
+
+    <label for="limit">수집할 개수:</label>
+    <input type="number" id="limit" name="limit" value="20" required><br>
+
+    <label for="sort">정렬 방식:</label>
+    <select id="sort" name="sort">
+      <option value="views">조회수순</option>
+      <option value="latest">최신순</option>
+    </select><br>
+
+    <button type="submit">수집 시작</button>
+  </form>
+
+  {% if message %}
+    <p class="result">{{ message }}</p>
+  {% endif %}
 </body>
 </html>

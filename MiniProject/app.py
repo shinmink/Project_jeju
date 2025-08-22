@@ -1,15 +1,30 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, request
+import subprocess
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
-# 정적 이미지 접근 허용
-@app.route('/static/<path:filename>')
-def static_files(filename):
-    return send_from_directory('static', filename)
+@app.route('/run', methods=['POST'])
+def run_script():
+    query = request.form['query']
+    limit = request.form['limit']
+    sort = request.form['sort']
+
+    try:
+        result = subprocess.run(
+            ['python3', 'scripts/youtube_crawler_clean.py', query, limit, sort],
+            capture_output=True,
+            text=True,
+            check=True  # 실패시 CalledProcessError 발생
+        )
+        output = result.stdout
+    except subprocess.CalledProcessError as e:
+        output = f"❌ 오류 발생:\n{e.stderr}"
+
+    return render_template('index.html', message=output)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)

@@ -3,6 +3,7 @@ import pandas as pd
 import re
 from datetime import datetime
 import os
+import sys  # ✅ 추가된 부분: 외부 인자 처리용
 
 # ✅ 텍스트 정제 함수
 def clean_text(text):
@@ -20,79 +21,80 @@ def convert_views_to_int(view_str):
     except:
         return 0
 
-# ✅ 사용자 입력
-query = input("🔍 수집할 유튜브 검색 키워드를 입력하세요: ").strip()
-limit_input = input("📦 몇 개의 결과를 수집할까요? (숫자만 입력): ").strip()
-sort_option = input("⚙️ 정렬 방식 선택 (latest / views): ").strip().lower()
+# ✅ 메인 수집 함수 (🆕 Flask 등에서 함수 호출 가능하도록 리팩토링됨)
+def collect_youtube_data(query, limit, sort_option):
+    today = datetime.now().strftime('%Y%m%d')
+    output_dir = "../hotplaces"
+    os.makedirs(output_dir, exist_ok=True)
 
-try:
-    limit = int(limit_input)
-except ValueError:
-    print("❌ 숫자만 입력하세요.")
-    exit()
+    data = []
+    collected = 0
+    search = VideosSearch(query, limit=20)
 
-# ✅ 날짜 생성
-today = datetime.now().strftime('%Y%m%d')
+    while collected < limit:
+        results = search.result()
 
-# ✅ 저장 폴더 생성
-output_dir = "../hotplaces"
-os.makedirs(output_dir, exist_ok=True)
+        for video in results['result']:
+            if collected >= limit:
+                break
 
-# ✅ 수집 및 정제
-data = []
-collected = 0
-search = VideosSearch(query, limit=20)
+            title = video.get('title', '')
+            link = video.get('link', '')
+            channel = video.get('channel', {}).get('name', '')
+            published = video.get('publishedTime', '')
+            views = video.get('viewCount', {}).get('short', '')
+            desc = " ".join([d['text'] for d in video.get('descriptionSnippet', [])]) if video.get('descriptionSnippet') else ''
 
-while collected < limit:
-    results = search.result()
+            clean_title = clean_text(title)
+            clean_desc = clean_text(desc)
 
-    for video in results['result']:
-        if collected >= limit:
-            break
+            data.append({
+                'title': clean_title,
+                'description': clean_desc,
+                'channel': channel,
+                'published': published,
+                'views': views,
+                'views_int': convert_views_to_int(views),
+                'link': link
+            })
 
-        title = video.get('title', '')
-        link = video.get('link', '')
-        channel = video.get('channel', {}).get('name', '')
-        published = video.get('publishedTime', '')
-        views = video.get('viewCount', {}).get('short', '')
-        desc = " ".join([d['text'] for d in video.get('descriptionSnippet', [])]) if video.get('descriptionSnippet') else ''
+            collected += 1
 
-        clean_title = clean_text(title)
-        clean_desc = clean_text(desc)
+        if collected < limit:
+            try:
+                search.next()
+            except:
+                print("⚠️ 더 이상 데이터가 없습니다.")
+                break
 
-        data.append({
-            'title': clean_title,
-            'description': clean_desc,
-            'channel': channel,
-            'published': published,
-            'views': views,
-            'views_int': convert_views_to_int(views),
-            'link': link
-        })
+    df = pd.DataFrame(data)
 
-        collected += 1
+    if sort_option == "views":
+        df = df.sort_values(by="views_int", ascending=False)
+    elif sort_option == "latest":
+        df = df.sort_values(by="published", ascending=False)
 
-    if collected < limit:
-        try:
-            search.next()
-        except:
-            print("⚠️ 더 이상 데이터가 없습니다.")
-            break
+    safe_keyword = query.replace(' ', '').replace('#', '')
+    file_name = f"{safe_keyword}_{today}_sorted_{sort_option}.csv"
+    file_path = os.path.join(output_dir, file_name)
 
-# ✅ DataFrame 생성 및 정렬
-df = pd.DataFrame(data)
+    df.drop(columns="views_int").to_csv(file_path, index=False, encoding='utf-8-sig')
 
-if sort_option == "views":
-    df = df.sort_values(by="views_int", ascending=False)
-elif sort_option == "latest":
-    df = df.sort_values(by="published", ascending=False)
+    return f"\n🎉 총 {len(df)}개의 영상 정보를 정렬하여 [{file_path}] 파일에 저장했습니다."
 
-# ✅ 저장 파일 경로
-safe_keyword = query.replace(' ', '').replace('#', '')
-file_name = f"{safe_keyword}_{today}_sorted_{sort_option}.csv"
-file_path = os.path.join(output_dir, file_name)
+# ✅ 명령줄 실행용 (🆕 input → 인자 방식으로 교체됨)
+if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("❌ 사용법: python youtube_crawler_clean.py <query> <limit> <sort_option>")
+        sys.exit(1)
 
-df.drop(columns="views_int").to_csv(file_path, index=False, encoding='utf-8-sig')
+    query = sys.argv[1]
+    try:
+        limit = int(sys.argv[2])
+    except ValueError:
+        print("❌ limit은 숫자여야 합니다.")
+        sys.exit(1)
+    sort_option = sys.argv[3].lower()
 
-# ✅ 완료 메시지
-print(f"\n🎉 총 {len(df)}개의 영상 정보를 정렬하여 [{file_path}] 파일에 저장했습니다.")
+    result_message = collect_youtube_data(query, limit, sort_option)
+    print(result_message)
