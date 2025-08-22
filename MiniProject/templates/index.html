@@ -39,6 +39,16 @@
         {% endif %}
         {% endfor %}
     </ul>
+<!-- ✅ 추가된 버튼 영역 -->
+    <div class="button-group">
+        <form method="POST" action="/generate_wordcloud">
+            <button type="submit">🌥️ 워드클라우드 생성하기</button>
+        </form>
+
+        <form method="POST" action="/generate_scatter">
+            <button type="submit">📊 스캐터 플롯 생성하기</button>
+        </form>
+    </div>
 </div>
 {% endif %}
 </body>
