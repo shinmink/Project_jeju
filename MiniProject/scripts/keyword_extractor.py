@@ -6,10 +6,11 @@ from datetime import datetime
 from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import shutil
 
-# ✅ 0. 가장 최근에 생성된 *_hotplaces.csv 파일 찾기
+
 # ✅ 0. 가장 최근에 생성된 hotplaces 디렉토리 내 csv 파일 찾기
-csv_files = glob.glob("hotplaces/*.csv")
+csv_files = glob.glob("../hotplaces/*.csv")
 if not csv_files:
     print("❌ 분석 가능한 hotplaces csv 파일이 없습니다.")
     exit()
@@ -69,19 +70,25 @@ wc = WordCloud(
 )
 wc.generate_from_frequencies(dict(most_common))
 
-# ✅ 7. 저장 디렉토리 생성
-output_dir = "wordcloud"
-os.makedirs(output_dir, exist_ok=True)
-
-# ✅ 8. 시각화 및 저장
+# ✅ 7. 저장 디렉토리 생성 및 저장
 date_str = datetime.now().strftime("%Y%m%d")
-wordcloud_filename = os.path.join(output_dir, f"wordcloud_{date_str}.png")
+output_path = f"../wordcloud/wordcloud_{date_str}.png"  # ✅ 날짜별 백업 경로
+os.makedirs("../wordcloud", exist_ok=True)
+wc.to_file(output_path)
+print(f"✅ 워드클라우드 저장 완료: {output_path}")
 
+# 🔁 8. Flask 웹에 사용될 static 폴더에도 복사 (경로 수정됨)
+static_path = "../static/wordcloud.png"  # 🆕 웹에서 고정 경로
+os.makedirs("../static", exist_ok=True)  # 🆕 폴더 없으면 생성
+shutil.copy(output_path, static_path)  # 🆕 복사 실행
+print(f"✅ Flask static 폴더에 복사됨: {static_path}")
+
+# ✅ 9. 화면 시각화
 plt.figure(figsize=(10, 8))
 plt.imshow(wc, interpolation="bilinear")
 plt.axis("off")
 plt.tight_layout()
-plt.savefig(wordcloud_filename)
+plt.savefig(output_path)
 plt.show()
 
-print(f"✅ 워드클라우드 생성 완료: {wordcloud_filename}")
+print(f"✅ 워드클라우드 생성 완료: {output_path}")

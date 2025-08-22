@@ -33,12 +33,18 @@
 
 ```
 📁 project/
+├── app.py                  # 👉 Flask 웹 서버
 ├── hotplaces/              # 유튜브 정제 CSV 저장 폴더
 │   └── 제주핫플_20250820_sorted_views.csv
 ├── wordcloud/              # 워드클라우드 이미지 저장 폴더
 │   └── wordcloud_20250820.png
 ├── scatter/                # 스캐터 플롯 이미지 저장 폴더
 │   └── scatter_avgviews_20250820.png
+├── templates/
+│   └── index.html          # 👉 메인 HTML 템플릿
+├── static/
+│   ├── wordcloud.png       # 👉 복사해놓은 이미지
+│   └── scatter.png
 └── scripts/                # 분석 코드
     ├── youtube_crawler_clean.py
     ├── keyword_extractor.py

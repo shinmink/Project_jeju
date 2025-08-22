@@ -7,6 +7,8 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import seaborn as sns
 import platform
+import shutil  # ✅ static 폴더 복사용
+
 
 # ✅ 한글 폰트 설정 (Mac, Windows, Linux 대응)
 if platform.system() == 'Darwin':  # macOS
@@ -19,7 +21,7 @@ else:
 plt.rcParams['axes.unicode_minus'] = False  # 마이너스 깨짐 방지
 
 # ✅ 1. 최신 핫플레이스 파일 불러오기
-csv_files = glob.glob("hotplaces/*.csv")
+csv_files = glob.glob("../hotplaces/*.csv")
 if not csv_files:
     print("❌ hotplaces 폴더에 분석할 파일이 없습니다.")
     exit()
@@ -113,7 +115,7 @@ plt.ylim(ymin, ymax)
 
 plt.tight_layout()
 # ✅ 저장
-output_dir = "scatter"
+output_dir = "../scatter"
 os.makedirs(output_dir, exist_ok=True)
 today = datetime.now().strftime('%Y%m%d')
 file_name = os.path.join(output_dir, f"scatter_avgviews_{today}.png")
@@ -121,3 +123,9 @@ plt.savefig(file_name)
 plt.show()
 
 print(f"✅ 스캐터 플롯 저장 완료: {file_name}")
+
+# 🆕 static 폴더에 웹용 이미지 복사
+static_path = "../static/scatter.png"
+os.makedirs("../static", exist_ok=True)
+shutil.copy(file_name, static_path)
+print(f"✅ Flask static 폴더에 복사됨: {static_path}")

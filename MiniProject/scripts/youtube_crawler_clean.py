@@ -35,7 +35,7 @@ except ValueError:
 today = datetime.now().strftime('%Y%m%d')
 
 # ✅ 저장 폴더 생성
-output_dir = "hotplaces"
+output_dir = "../hotplaces"
 os.makedirs(output_dir, exist_ok=True)
 
 # ✅ 수집 및 정제
