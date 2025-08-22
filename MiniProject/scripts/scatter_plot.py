@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import platform
 import shutil  # ✅ static 폴더 복사용
+import sys
 
 
 # ✅ 한글 폰트 설정 (Mac, Windows, Linux 대응)
@@ -21,14 +22,17 @@ else:
 plt.rcParams['axes.unicode_minus'] = False  # 마이너스 깨짐 방지
 
 # ✅ 1. 최신 핫플레이스 파일 불러오기
-csv_files = glob.glob("../hotplaces/*.csv")
-if not csv_files:
-    print("❌ hotplaces 폴더에 분석할 파일이 없습니다.")
-    exit()
+# csv_files = glob.glob("../hotplaces/*.csv")
+# if not csv_files:
+#     print("❌ hotplaces 폴더에 분석할 파일이 없습니다.")
+#     exit()
 
-latest_file = max(csv_files, key=os.path.getmtime)
-print(f"📂 최신 파일 로드: {latest_file}")
-df = pd.read_csv(latest_file, encoding='utf-8-sig')
+# latest_file = max(csv_files, key=os.path.getmtime)
+# print(f"📂 최신 파일 로드: {latest_file}")
+# df = pd.read_csv(latest_file, encoding='utf-8-sig')
+
+csv_path = sys.argv[1]
+df = pd.read_csv(csv_path, encoding="utf-8-sig")
 
 # ✅ 조회수 전처리: '1.2M', '850K', '10000' 등 → 정수
 def parse_views(view_str):

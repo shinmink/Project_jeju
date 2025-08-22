@@ -7,19 +7,23 @@ from collections import Counter
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import shutil
+import sys
 
 
-# ✅ 0. 가장 최근에 생성된 hotplaces 디렉토리 내 csv 파일 찾기
-csv_files = glob.glob("../hotplaces/*.csv")
-if not csv_files:
-    print("❌ 분석 가능한 hotplaces csv 파일이 없습니다.")
-    exit()
+# # ✅ 0. 가장 최근에 생성된 hotplaces 디렉토리 내 csv 파일 찾기
+# csv_files = glob.glob("../hotplaces/*.csv")
+# if not csv_files:
+#     print("❌ 분석 가능한 hotplaces csv 파일이 없습니다.")
+#     exit()
 
-latest_file = max(csv_files, key=os.path.getmtime)
-print(f"📂 가장 최신 파일을 불러옵니다: {latest_file}")
+# latest_file = max(csv_files, key=os.path.getmtime)
+# print(f"📂 가장 최신 파일을 불러옵니다: {latest_file}")
+#
+# # ✅ 1. 데이터 로드
+# df = pd.read_csv(latest_file, encoding="utf-8-sig")
 
-# ✅ 1. 데이터 로드
-df = pd.read_csv(latest_file, encoding="utf-8-sig")
+csv_path = sys.argv[1]
+df = pd.read_csv(csv_path, encoding="utf-8-sig")
 
 # ✅ 2. 제목 + 설명 합치고 정제
 text = (df['title'].fillna('') + ' ' + df['description'].fillna('')).str.cat(sep=' ')
