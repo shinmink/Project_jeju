@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, session
 import subprocess
 
 app = Flask(__name__)
+app.secret_key = 'd04a0177ee3f235f95e354721bdabfdd'  # 세션 사용 위해 필요 (임시 키)
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    preview = session.get('preview', [])
+    return render_template('index.html', preview=preview)
 
 @app.route('/run', methods=['POST'])
 def run_script():
@@ -18,7 +20,7 @@ def run_script():
             ['python3', 'scripts/youtube_crawler_clean.py', query, limit, sort],
             capture_output=True,
             text=True,
-            check=True  # 실패시 CalledProcessError 발생
+            check=True
         )
         output = result.stdout
     except subprocess.CalledProcessError as e:
@@ -26,38 +28,39 @@ def run_script():
 
     summary_lines = result.stdout.split('\n')
     message = summary_lines[0]
-    preview = summary_lines[1:]  # 상위 5개 영상
+    preview = summary_lines[1:]
+    session['preview'] = preview  # 세션에 저장
     return render_template('index.html', message=message, preview=preview)
 
-# 워드클라우드
 @app.route('/keyword_extractor', methods=['POST'])
 def generate_wordcloud():
     try:
-        result = subprocess.run(
+        subprocess.run(
             ['python3', 'scripts/keyword_extractor.py'],
             capture_output=True,
             text=True,
             check=True
         )
         image_path = url_for('static', filename='wordcloud.png')
-        return render_template('index.html', image=image_path, message="✅ 워드클라우드 생성 완료!", show_modal=True)
+        preview = session.get('preview', [])
+        return render_template('index.html', image=image_path, message="✅ 워드클라우드 생성 완료!", show_modal=True, preview=preview)
     except subprocess.CalledProcessError as e:
         return render_template('index.html', message=f"❌ 워드클라우드 생성 오류:\n{e.stderr}")
 
-# 스캐터 플롯
 @app.route('/scatter_plot', methods=['POST'])
 def generate_scatter():
     try:
-        result = subprocess.run(
+        subprocess.run(
             ['python3', 'scripts/scatter_plot.py'],
             capture_output=True,
             text=True,
             check=True
         )
         image_path = url_for('static', filename='scatter.png')
-        return render_template('index.html', image=image_path, message="✅ 스캐터 플롯 생성 완료!", show_modal=True)
+        preview = session.get('preview', [])
+        return render_template('index.html', image=image_path, message="✅ 스캐터 플롯 생성 완료!", show_modal=True, preview=preview)
     except subprocess.CalledProcessError as e:
         return render_template('index.html', message=f"❌ 스캐터 플롯 생성 오류:\n{e.stderr}")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
