@@ -57,15 +57,15 @@
   {% endif %}
 
   <!-- ✅ show_modal이 True일 때만 모달 렌더링 -->
-  {% if show_modal %}
-  <div id="imageModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="modalCloseBtn">&times;</span>
-      {% if image %}
-        <img src="{{ image }}" alt="결과 이미지" style="max-width: 100%; height: auto;">
-      {% endif %}
-    </div>
-  </div>
+<!--  {% if show_modal %}-->
+<!--  <div id="imageModal" class="modal">-->
+<!--    <div class="modal-content">-->
+<!--      <span class="close" id="modalCloseBtn">&times;</span>-->
+<!--      {% if image %}-->
+<!--        <img src="{{ image }}" alt="결과 이미지" style="max-width: 100%; height: auto;">-->
+<!--      {% endif %}-->
+<!--    </div>-->
+<!--  </div>-->
 
   <!-- ✅ 모달 동작 JS (조건부 포함) -->
   <script>
